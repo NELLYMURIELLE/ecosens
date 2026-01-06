@@ -53,7 +53,7 @@
                 {% for equipment in equipments %}
                <div class="equipment-card">
                     <div class="equipment-icon">
-                        {% if equipment.category == 'Électroménager' %}
+                        {% if equipment.category == 'Ménager' %}
                             <i class="fas fa-blender"></i>
                         {% elif equipment.category == 'Multimédia' %}
                             <i class="fas fa-tv"></i>
@@ -61,7 +61,7 @@
                             <i class="fas fa-laptop"></i>
                         {% elif equipment.category == 'Éclairage' %}
                             <i class="fas fa-lightbulb"></i>
-                        {% elif equipment.category == 'Chauffage/Climatisation' %}
+                        {% elif equipment.category == 'Climatisation' %}
                             <i class="fas fa-snowflake"></i>
                         {% else %}
                             <i class="fas fa-plug"></i>
@@ -88,14 +88,6 @@
                     </div>
                </div>
                 {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <i class="fas fa-inbox" style="font-size: 4rem; color: #bdc3c7; margin-bottom: 1rem;"></i>
-                <p>Vous n'avez pas encore d'équipement enregistré.</p>
-                <a href="{{ url_for('add_equipment') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Ajouter votre premier équipement
-                </a>
             </div>
         {% endif %}
     </div>

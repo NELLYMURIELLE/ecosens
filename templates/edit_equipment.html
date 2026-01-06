@@ -47,11 +47,11 @@
                 <div class="form-group">
                     <label for="category">Catégorie</label>
                     <select id="category" name="category" required>
-                        <option value="Électroménager" {% if equipment.category == 'Électroménager' %}selected{% endif %}>Électroménager</option>
+                        <option value="Électroménager" {% if equipment.category == 'Ménager' %}selected{% endif %}>Ménager</option>
                         <option value="Multimédia" {% if equipment.category == 'Multimédia' %}selected{% endif %}>Multimédia</option>
                         <option value="Informatique" {% if equipment.category == 'Informatique' %}selected{% endif %}>Informatique</option>
                         <option value="Éclairage" {% if equipment.category == 'Éclairage' %}selected{% endif %}>Éclairage</option>
-                        <option value="Chauffage/Climatisation" {% if equipment.category == 'Chauffage/Climatisation' %}selected{% endif %}>Chauffage/Climatisation</option>
+                        <option value="Chauffage/Climatisation" {% if equipment.category == 'Climatisation' %}selected{% endif %}>Climatisation</option>
                         <option value="Autre" {% if equipment.category == 'Autre' %}selected{% endif %}>Autre</option>
                     </select>
                 </div>

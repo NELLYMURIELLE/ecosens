@@ -146,24 +146,22 @@
             </table>
         </div>
 
-        <!-- Conseils -->
         <div class="info-box">
             <strong><i class="fas fa-lightbulb"></i> Analyse :</strong>
             <ul>
                 {% if stats.trend == 'up' %}
                 <li> Votre consommation a <strong>augmenté de {{ stats.difference }}%</strong> ce mois-ci.</li>
-                <li> Conseil : Identifiez les équipements énergivores et réduisez leur utilisation.</li>
+                <li> Conseil : Identifiez les équipements qui consomment le plus et réduisez leur utilisation.</li>
                 {% elif stats.trend == 'down' %}
                 <li>Bravo ! Votre consommation a <strong>diminué de {{ stats.difference|abs }}%</strong> ce mois-ci.</li>
-                <li> Continuez sur cette lancée pour encore plus d'économies !</li>
                 {% else %}
                 <li>️ Votre consommation est <strong>stable</strong> par rapport au mois dernier.</li>
                 {% endif %}
 
                 {% if stats.current_month > stats.average_monthly %}
-                <li> Vous êtes au-dessus de votre moyenne mensuelle ({{ stats.average_monthly }} kWh).</li>
+                <li> Vous êtes au-dessus de la moyenne mensuelle ({{ stats.average_monthly }} kWh).</li>
                 {% else %}
-                <li> Vous êtes en dessous de votre moyenne mensuelle ({{ stats.average_monthly }} kWh).</li>
+                <li> Vous êtes en dessous de la moyenne mensuelle ({{ stats.average_monthly }} kWh).</li>
                 {% endif %}
             </ul>
         </div>
