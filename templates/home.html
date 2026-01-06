@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - EcoSense</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><i class="fas fa-leaf"></i> EcoSense</div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('home') }}" class="active"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="{{ url_for('equipments') }}"><i class="fas fa-plug"></i> Équipements</a></li>
+            <li><a href="{{ url_for('add_usage') }}"><i class="fas fa-plus-circle"></i> Nouvelle utilisation</a></li>
+            <li><a href="{{ url_for('statistics') }}"><i class="fas fa-chart-bar"></i> Stats</a></li>
+            <li><a href="{{ url_for('comparisons') }}"><i class="fas fa-balance-scale"></i> Comparaisons</a></li>
+            <li><a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Paramètres</a></li>
+            {% if session.is_admin == 1 %}
+            <li><a href="{{ url_for('admin_panel') }}"><i class="fas fa-shield-alt"></i> Admin</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+        </ul>
+        <div class="nav-user">
+            <a href="{{ url_for('profile') }}" style="color: inherit; text-decoration: none;">
+                <i class="fas fa-user-circle"></i> {{ session.username }}
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-tachometer-alt"></i> Tableau de bord</h1>
+            <a href="{{ url_for('add_usage') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Enregistrer une utilisation
+            </a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-info-circle"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-bolt" style="color: #f39c12;"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Consommation aujourd'hui</h3>
+                    <p class="stat-value">{{ total_today }} kWh</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-bullseye" style="color: #9b59b6;"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Objectif quotidien</h3>
+                    <p class="stat-value">{{ daily_goal }} kWh</p>
+                    <small>
+                        {% if total_today <= daily_goal %}
+                            <span style="color: #2ecc71;">✓ Objectif respecté</span>
+                        {% else %}
+                            <span style="color: #e74c3c;">✗ Dépassé de {{ (total_today - daily_goal)|round(2) }} kWh</span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-plug" style="color: #3498db;"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Équipements enregistrés</h3>
+                    <p class="stat-value">{{ total_equipments }}</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-money-bill-wave" style="color: #2ecc71;"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Coût estimé (150 FCFA/kWh)</h3>
+                    <p class="stat-value">{{ (total_today * 150)|round|int }} FCFA</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertes -->
+        {% if alerts %}
+        <div class="alerts-section">
+            {% for alert in alerts %}
+            <div class="alert alert-{{ alert.alert_type }}">
+                {{ alert.message }}
+                <a href="{{ url_for('mark_alert_read', alert_id=alert.id) }}" class="alert-close">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="section">
+            <h2><i class="fas fa-history"></i> Dernières utilisations</h2>
+            {% if recent_usages %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th><i class="far fa-calendar-alt"></i> Date</th>
+                            <th><i class="fas fa-plug"></i> Équipement</th>
+                            <th><i class="far fa-clock"></i> Durée</th>
+                            <th><i class="fas fa-bolt"></i> Consommation</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usage in recent_usages %}
+                        <tr>
+                            <td>{{ usage.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ usage.equipment.name }}</td>
+                            <td>{{ usage.duree_heures }} h</td>
+                            <td><strong>{{ usage.consommation_kwh|round(2) }} kWh</strong></td>
+                            <td>
+                                <a href="{{ url_for('edit_usage', usage_id=usage.id) }}" class="btn-small btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('delete_usage', usage_id=usage.id) }}"
+                                   class="btn-small btn-delete"
+                                   onclick="return confirm('Supprimer cette utilisation ?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox" style="font-size: 4rem; color: #bdc3c7; margin-bottom: 1rem;"></i>
+                    <p>Aucune utilisation enregistrée pour le moment.</p>
+                    <a href="{{ url_for('add_usage') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Enregistrer votre première utilisation
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

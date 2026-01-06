@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enregistrer une Utilisation - EcoSense</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><i class="fas fa-leaf"></i> EcoSense</div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="{{ url_for('equipments') }}"><i class="fas fa-plug"></i> Équipements</a></li>
+            <li><a href="{{ url_for('add_usage') }}" class="active"><i class="fas fa-plus-circle"></i> Ajouter</a></li>
+            <li><a href="{{ url_for('statistics') }}"><i class="fas fa-chart-bar"></i> Stats</a></li>
+            <li><a href="{{ url_for('comparisons') }}"><i class="fas fa-balance-scale"></i> Comparaisons</a></li>
+            <li><a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Paramètres</a></li>
+            {% if session.is_admin == 1 %}
+            <li><a href="{{ url_for('admin_panel') }}"><i class="fas fa-shield-alt"></i> Admin</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Quitter</a></li>
+        </ul>
+        <div class="nav-user">
+            <a href="{{ url_for('profile') }}" style="color: inherit; text-decoration: none;">
+                <i class="fas fa-user-circle"></i> {{ session.username }}
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Enregistrer une utilisation</h1>
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Retour</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if equipments %}
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('add_usage') }}">
+                <div class="form-group">
+                    <label for="equipment_id">Équipement</label>
+                    <select id="equipment_id" name="equipment_id" required>
+                        <option value="">-- Sélectionner --</option>
+                        {% for equipment in equipments %}
+                        <option value="{{ equipment.id }}" data-power="{{ equipment.puissance_watts }}">
+                            {{ equipment.name }} ({{ equipment.puissance_watts }} W)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="time-inputs">
+                    <div class="form-group">
+                        <label for="heures">Heures</label>
+                        <input type="number" id="heures" name="heures" min="0" value="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="minutes">Minutes</label>
+                        <input type="number" id="minutes" name="minutes" min="0" max="59" value="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="consommation_kwh">Consommation (kWh)</label>
+                    <input type="number" id="consommation_kwh" name="consommation_kwh" step="0.01" min="0" placeholder="Calcul automatique ou saisie manuelle">
+                    <small>Laissez vide pour calcul automatique selon la durée</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date et heure</label>
+                    <input type="datetime-local" id="date" name="date">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>Aucun équipement disponible.</p>
+            <a href="{{ url_for('add_equipment') }}" class="btn btn-primary">Ajouter un équipement</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('date').value = new Date().toISOString().slice(0, 16);
+    </script>
+</body>
+</html>

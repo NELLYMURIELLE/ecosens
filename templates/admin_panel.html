@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin - EcoSense</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><i class="fas fa-leaf"></i> EcoSense</div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="{{ url_for('equipments') }}"><i class="fas fa-plug"></i> Équipements</a></li>
+            <li><a href="{{ url_for('add_usage') }}"><i class="fas fa-plus-circle"></i> Ajouter</a></li>
+            <li><a href="{{ url_for('statistics') }}"><i class="fas fa-chart-bar"></i> Stats</a></li>
+            <li><a href="{{ url_for('comparisons') }}"><i class="fas fa-balance-scale"></i> Comparaisons</a></li>
+            <li><a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Paramètres</a></li>
+            {% if session.is_admin == 1 %}
+            <li><a href="{{ url_for('admin_panel') }}"><i class="fas fa-shield-alt"></i> Admin</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Quitter</a></li>
+        </ul>
+        <div class="nav-user"><i class="fas fa-crown"></i> {{ session.username }} (Admin)</div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-shield-alt"></i> Panel d'Administration</h1>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Utilisateurs en attente -->
+        <div class="section">
+            <h2><i class="fas fa-hourglass-half"></i> Utilisateurs en attente de validation</h2>
+            {% if pending_users %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom d'utilisateur</th>
+                            <th>Email</th>
+                            <th>Date d'inscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in pending_users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.date_created.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('approve_user', user_id=user.id) }}" class="btn-small btn-edit">
+                                    <i class="fas fa-check"></i> Approuver
+                                </a>
+                                <a href="{{ url_for('reject_user', user_id=user.id) }}"
+                                   class="btn-small btn-delete"
+                                   onclick="return confirm('Rejeter cet utilisateur ?')">
+                                    <i class="fas fa-times"></i> Rejeter
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-state">Aucun utilisateur en attente.</p>
+            {% endif %}
+        </div>
+
+        <!-- Utilisateurs approuvés -->
+        <div class="section">
+            <h2><i class="fas fa-users"></i> Utilisateurs approuvés</h2>
+            {% if approved_users %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom d'utilisateur</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Date d'inscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in approved_users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.is_admin == 1 %}
+                                    <span style="color: #e74c3c;"><i class="fas fa-crown"></i> Admin</span>
+                                {% else %}
+                                    <span>Utilisateur</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.date_created.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                {% if user.id != session.user_id %}
+                                <a href="{{ url_for('delete_user', user_id=user.id) }}"
+                                   class="btn-small btn-delete"
+                                   onclick="return confirm('Supprimer cet utilisateur ?')">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </a>
+                                {% else %}
+                                <span style="color: #95a5a6;">Vous-même</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-state">Aucun utilisateur approuvé.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

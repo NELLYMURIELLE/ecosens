@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Comparaisons - EcoSense</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><i class="fas fa-leaf"></i> EcoSense</div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="{{ url_for('equipments') }}"><i class="fas fa-plug"></i> Équipements</a></li>
+            <li><a href="{{ url_for('add_usage') }}"><i class="fas fa-plus-circle"></i> Ajouter</a></li>
+            <li><a href="{{ url_for('statistics') }}"><i class="fas fa-chart-bar"></i> Stats</a></li>
+            <li><a href="{{ url_for('comparisons') }}" class="active"><i class="fas fa-balance-scale"></i> Comparaisons</a></li>
+            <li><a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Paramètres</a></li>
+            {% if session.is_admin == 1 %}
+            <li><a href="{{ url_for('admin_panel') }}"><i class="fas fa-shield-alt"></i> Admin</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Quitter</a></li>
+        </ul>
+        <div class="nav-user">
+            <a href="{{ url_for('profile') }}" style="color: inherit; text-decoration: none;">
+                <i class="fas fa-user-circle"></i> {{ session.username }}
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-balance-scale"></i> Comparaisons mensuelles</h1>
+            <a href="{{ url_for('statistics') }}" class="btn btn-secondary">Retour aux stats</a>
+        </div>
+
+        <!-- Statistiques de comparaison -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check" style="color: #2ecc71;"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Mois actuel</h3>
+                    <p class="stat-value">{{ stats.current_month }} kWh</p>
+                    <small>{{ (stats.current_month * 150)|round|int }} FCFA</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-alt" style="color: #3498db;"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Mois précédent</h3>
+                    <p class="stat-value">{{ stats.last_month }} kWh</p>
+                    <small>{{ (stats.last_month * 150)|round|int }} FCFA</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    {% if stats.trend == 'up' %}
+                        <i class="fas fa-arrow-up" style="color: #e74c3c;"></i>
+                    {% elif stats.trend == 'down' %}
+                        <i class="fas fa-arrow-down" style="color: #2ecc71;"></i>
+                    {% else %}
+                        <i class="fas fa-minus" style="color: #95a5a6;"></i>
+                    {% endif %}
+                </div>
+                <div class="stat-content">
+                    <h3>Évolution</h3>
+                    <p class="stat-value" style="color: {% if stats.trend == 'up' %}#e74c3c{% elif stats.trend == 'down' %}#2ecc71{% else %}#95a5a6{% endif %}">
+                        {{ stats.difference }}%
+                    </p>
+                    <small>
+                        {% if stats.difference > 0 %}
+                            Augmentation par rapport au mois dernier
+                        {% elif stats.difference < 0 %}
+                            Diminution par rapport au mois dernier
+                        {% else %}
+                            Stable
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line" style="color: #9b59b6;"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Moyenne mensuelle (6 mois)</h3>
+                    <p class="stat-value">{{ stats.average_monthly }} kWh</p>
+                    <small>{{ (stats.average_monthly * 150)|round|int }} FCFA</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique de comparaison -->
+        <div class="section">
+            <h2><i class="fas fa-chart-bar"></i> Évolution des 6 derniers mois</h2>
+            <canvas id="comparisonChart"></canvas>
+        </div>
+
+        <!-- Tableau détaillé -->
+        <div class="section">
+            <h2><i class="fas fa-table"></i> Détails mensuels</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mois</th>
+                        <th>Consommation (kWh)</th>
+                        <th>Coût estimé (FCFA)</th>
+                        <th>Écart avec moyenne</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month in monthly_data %}
+                    <tr>
+                        <td><strong>{{ month.month }}</strong></td>
+                        <td>{{ month.consommation }} kWh</td>
+                        <td>{{ month.cout }} FCFA</td>
+                        <td>
+                            {% set diff = month.consommation - stats.average_monthly %}
+                            {% if diff > 0 %}
+                                <span style="color: #e74c3c;">+{{ diff|round(2) }} kWh</span>
+                            {% elif diff < 0 %}
+                                <span style="color: #2ecc71;">{{ diff|round(2) }} kWh</span>
+                            {% else %}
+                                <span style="color: #95a5a6;">Égal</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="background: #f8f9fa; font-weight: bold;">
+                        <td>TOTAL (6 mois)</td>
+                        <td>{{ monthly_data | sum(attribute='consommation') | round(2) }} kWh</td>
+                        <td>{{ monthly_data | sum(attribute='cout') | round | int }} FCFA</td>
+                        <td>-</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Conseils -->
+        <div class="info-box">
+            <strong><i class="fas fa-lightbulb"></i> Analyse :</strong>
+            <ul>
+                {% if stats.trend == 'up' %}
+                <li> Votre consommation a <strong>augmenté de {{ stats.difference }}%</strong> ce mois-ci.</li>
+                <li> Conseil : Identifiez les équipements énergivores et réduisez leur utilisation.</li>
+                {% elif stats.trend == 'down' %}
+                <li>Bravo ! Votre consommation a <strong>diminué de {{ stats.difference|abs }}%</strong> ce mois-ci.</li>
+                <li> Continuez sur cette lancée pour encore plus d'économies !</li>
+                {% else %}
+                <li>️ Votre consommation est <strong>stable</strong> par rapport au mois dernier.</li>
+                {% endif %}
+
+                {% if stats.current_month > stats.average_monthly %}
+                <li> Vous êtes au-dessus de votre moyenne mensuelle ({{ stats.average_monthly }} kWh).</li>
+                {% else %}
+                <li> Vous êtes en dessous de votre moyenne mensuelle ({{ stats.average_monthly }} kWh).</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ monthly_data | map(attribute='month_short') | list | tojson }},
+                datasets: [
+                    {
+                        label: 'Consommation (kWh)',
+                        data: {{ monthly_data | map(attribute='consommation') | list | tojson }},
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: '#3498db',
+                        borderWidth: 3,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Moyenne',
+                        data: Array(6).fill({{ stats.average_monthly }}),
+                        borderColor: '#e74c3c',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
