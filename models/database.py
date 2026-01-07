@@ -109,6 +109,5 @@ class Alert(Base):
     user = relationship('User', backref='alerts', lazy='select')
 
 
-# Exécuter si ce fichier est lancé directement
 if __name__ == '__main__':
     init_db()

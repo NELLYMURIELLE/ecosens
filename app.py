@@ -7,7 +7,6 @@ app = Flask(__name__)
 app.secret_key = 'votre_cle_secrete_super_securisee_123'
 
 
-# Décorateur pour protéger les routes
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -19,7 +18,7 @@ def login_required(f):
     return decorated_function
 
 
-# Route : Redirection initiale
+ # Redirection initiale
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -27,7 +26,7 @@ def index():
     return redirect(url_for('login'))
 
 
-# Route : Inscription
+# Inscription
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -69,7 +68,7 @@ def register():
     return render_template('register.html')
 
 
-# Route : Connexion
+# Connexion
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -154,7 +153,7 @@ def home():
     finally:
         db.close()
 
-# Route : Liste des équipements
+# Liste des équipements
 @app.route('/equipments')
 @login_required
 def equipments():
@@ -171,7 +170,7 @@ def equipments():
         db.close()
 
 
-# Route : Ajouter un équipement
+# Ajouter un équipement
 @app.route('/add_equipment', methods=['GET', 'POST'])
 @login_required
 def add_equipment():
@@ -203,7 +202,7 @@ def add_equipment():
     return render_template('add_equipment.html')
 
 
-# Route : Enregistrer une utilisation
+# Enregistrer une utilisation
 @app.route('/add_usage', methods=['GET', 'POST'])
 @login_required
 def add_usage():
@@ -267,7 +266,7 @@ def add_usage():
         db.close()
 
 
-# Route : Statistiques
+# Statistiques
 @app.route('/statistics')
 @login_required
 def statistics():
@@ -319,7 +318,7 @@ def statistics():
     finally:
         db.close()
 
-# Route : Supprimer un équipement
+# Supprimer un équipement
 @app.route('/delete_equipment/<int:equipment_id>')
 @login_required
 def delete_equipment(equipment_id):
@@ -344,7 +343,7 @@ def delete_equipment(equipment_id):
     return redirect(url_for('equipments'))
 
 
-# Route : Modifier un équipement
+# Modifier un équipement
 @app.route('/edit_equipment/<int:equipment_id>', methods=['GET', 'POST'])
 @login_required
 def edit_equipment(equipment_id):
@@ -375,7 +374,7 @@ def edit_equipment(equipment_id):
         db.close()
 
 
-# Route : Supprimer une utilisation
+# Supprimer une utilisation
 @app.route('/delete_usage/<int:usage_id>')
 @login_required
 def delete_usage(usage_id):
@@ -400,7 +399,7 @@ def delete_usage(usage_id):
     return redirect(url_for('home'))
 
 
-# Route : Modifier une utilisation
+# Modifier une utilisation
 @app.route('/edit_usage/<int:usage_id>', methods=['GET', 'POST'])
 @login_required
 def edit_usage(usage_id):
@@ -436,8 +435,6 @@ def edit_usage(usage_id):
     finally:
         db.close()
 
-
-# Décorateur pour routes admin uniquement
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -452,7 +449,7 @@ def admin_required(f):
     return decorated_function
 
 
-# Route : Panel d'administration
+# Panel d'administration
 @app.route('/admin')
 @admin_required
 def admin_panel():
@@ -472,7 +469,7 @@ def admin_panel():
         db.close()
 
 
-# Route : Approuver un utilisateur
+# Approuver un utilisateur
 @app.route('/admin/approve/<int:user_id>')
 @admin_required
 def approve_user(user_id):
@@ -493,7 +490,7 @@ def approve_user(user_id):
     return redirect(url_for('admin_panel'))
 
 
-# Route : Rejeter un utilisateur
+# Rejeter un utilisateur
 @app.route('/admin/reject/<int:user_id>')
 @admin_required
 def reject_user(user_id):
@@ -514,7 +511,7 @@ def reject_user(user_id):
     return redirect(url_for('admin_panel'))
 
 
-# Route : Supprimer un utilisateur approuvé
+# Supprimer un utilisateur approuvé
 @app.route('/admin/delete/<int:user_id>')
 @admin_required
 def delete_user(user_id):
@@ -535,7 +532,7 @@ def delete_user(user_id):
     return redirect(url_for('admin_panel'))
 
 
-# Route : Profil utilisateur
+# Profil utilisateur
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -590,7 +587,7 @@ def profile():
         db.close()
 
 
-# Route : Prédictions
+# Prédictions
 @app.route('/predictions')
 @login_required
 def predictions():
@@ -606,7 +603,7 @@ def predictions():
     return render_template('predictions.html', predictions=predictions_data)
 
 
-# Route : Marquer alerte comme lue
+# Marquer alerte comme lue
 @app.route('/alert/read/<int:alert_id>')
 @login_required
 def mark_alert_read(alert_id):
@@ -615,7 +612,7 @@ def mark_alert_read(alert_id):
     return redirect(url_for('home'))
 
 
-# Route : Paramètres d'alerte
+# Paramètres d'alerte
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
@@ -637,7 +634,7 @@ def settings():
         db.close()
 
 
-# Route : Comparaisons mensuelles
+# Comparaisons mensuelles
 @app.route('/comparisons')
 @login_required
 def comparisons():
